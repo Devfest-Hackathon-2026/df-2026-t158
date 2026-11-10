@@ -1,79 +1,52 @@
 # FESWAVE
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="apps/feswave_android/assets/feswave.svg">
-  <img alt="FESWAVE" src="apps/feswave_android/assets/feswave-light.svg" width="268" height="60">
-</picture>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="apps/feswave_android/assets/feswave.svg">
+    <img alt="FESWAVE" src="apps/feswave_android/assets/feswave-light.svg" width="268" height="60">
+  </picture>
+</p>
 
-ライブで思わず手を叩きたくなった瞬間に、スマホの画面をタップ。近くの人も同じタイミングで盛り上がると、その人の好きな曲が「共感メモリ」として端末に残ります。Android向けのオープンソースアプリです。
+<p align="center">
+  <a href="https://github.com/Devfest-Hackathon-2026/df-2026-t158/releases/download/submission-2026/feswave-android-arm64.apk"><img src="https://img.shields.io/badge/Android%2012%2B-APK-72cabe?logo=android" alt="Android 12以上向け提出版APKをダウンロード"></a>
+  <a href="https://github.com/mashumarrow/feswave/actions/workflows/android.yml"><img src="https://img.shields.io/badge/Actions-APK%20build-586579?logo=githubactions" alt="Androidのビルド履歴"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-c77d99" alt="MITライセンス"></a>
+</p>
 
-[提出版APKをダウンロード](https://github.com/Devfest-Hackathon-2026/df-2026-t158/releases/download/submission-2026/feswave-android-arm64.apk) · [実機検証](apps/feswave_android/verification/README.md) · [公開APIの稼働確認](https://feswave-api-933816421570.asia-northeast1.run.app/api/health) · [MITライセンス](LICENSE)
+ライブで好きなフレーズが流れたら、スマホの画面をタップします。近くで同じように反応した人がいると、その人が公開している曲が「共感メモリ」として自分の端末に残ります。ライブのあとでも「メモリ」を開いて曲を見返せます。
 
 ## 2台で試す
 
-配布APKはarm64用の署名付きリリースビルドです。Android 12以上で、Bluetooth LE（BLE）の広告とスキャンに対応するスマホを2台用意します。ライブと共感メモリは、ゲストのままサーバーなしで試せます。
+Android 12以上で、Bluetooth LEの広告とスキャンに対応したarm64端末を2台用意してください。曲を手入力すれば、ゲストのままオフラインで試せます。[提出版APKをダウンロード](https://github.com/Devfest-Hackathon-2026/df-2026-t158/releases/download/submission-2026/feswave-android-arm64.apk)
 
-1. 両方の端末にAPKをインストールし、Bluetooth・位置情報・自動日時設定をオンにします。
-2. プロフィールで「好きな曲とアイコンを公開」をオンにします。配布APKでは、インターネットに接続すると公開APIで曲を検索できます。
-3. 「ライブを始める」を押し、付近のデバイスと正確な位置情報の権限を許可します。2台を近くに置き、ライブ画面に相手が現れるまで待ちます。
-4. 2台でライブ画面を同じタイミングでタップします。近接とリアクションの条件を満たすと、受信した端末の「メモリ」で記録を見返せます。
+1. 両方の端末にAPKを入れ、Bluetooth・位置情報・自動日時設定をオンにします。
+2. 各端末のプロフィールでニックネームと好きな曲を登録し、「好きな曲とアイコンを公開」をオンにして保存します。
+3. 「ライブを始める」を押し、付近のデバイスと正確な位置情報の権限を許可します。2台を近くに置くと、ライブ画面に相手のアイコンが現れます。
+4. 相手のアイコンが見えたら、2人で同じ5秒間に同じくらいタップします。相手のアイコンから波紋が広がり、近さとタップの条件がそろうと「メモリ」に相手と曲が残ります。
 
-ライブ画面右上のマイクをオンにすると、周囲の音の周波数に合わせて中央のリングが動きます。音声は端末内で解析し、保存・送信しません。
+ライブ画面右上のマイクをオンにすると、周囲の音に合わせて中央のリングが動きます。音声は端末内で解析し、保存も送信もしません。
 
-## 共感メモリができる仕組み
+## 共感メモリが残る仕組み
 
-端末はBLE広告で一時IDと5秒ごとの反応レベルを交換します。ライブ画面では電波が強い相手ほど中心に近く表示されます。円周上の位置は演出です。
+2台のスマホがBluetoothで一時IDとタップの反応レベルを交換します。アプリは電波の強さから相手の近さを推定し、同じ5秒間の反応を比べます。条件がそろうと相手の公開プロフィールを直接読み取り、自分の端末に保存します。
 
-両者が公開設定で、同じ5秒区間にタップし、5段階の反応レベルの差が1以内なら、受信側が近接条件を確認します。直近15秒に3件以上の観測があり、受信強度の中央値が−72 dBm以上で、反応した区間にも受信できていれば、公開プロフィールをGATTで読み取り、端末内のSQLiteに保存します。
+Pixel 4とRedmi Note 10 JEで距離を変えて各1回試したところ、1 mでは両方の端末にメモリが残り、2 mではどちらにも残りませんでした。電波の強さは機種や持ち方で変わり、混雑した会場での誤判定率は未評価です。[試験条件と実測値](apps/feswave_android/verification/README.md)
 
-Pixel 4とRedmi Note 10 JEを使った各距離1回の試験では、1 mで両方にメモリが残り、2 mでは両方とも保存されませんでした。電波強度は機種や持ち方で変わります。[実測値と試験条件](apps/feswave_android/verification/README.md)
+## 技術スタック
 
-## ソースから起動する
-
-Android SDK、JDK 17、miseを用意し、USBデバッグを有効にした端末を接続します。Flutterのバージョンはリポジトリで固定しています。
-
-```sh
-git clone https://github.com/Devfest-Hackathon-2026/df-2026-t158.git
-cd df-2026-t158/apps/feswave_android
-mise trust
-mise install
-mise exec -- flutter pub get --enforce-lockfile
-mise exec -- flutter devices
-mise exec -- flutter run -d DEVICE_ID
-```
-
-`DEVICE_ID` は直前のコマンドに表示された端末IDに置き換えます。[Androidアプリの構成・APKビルド手順](apps/feswave_android/README.md)
-
-### 曲検索とプロフィール同期
-
-Rust（Cargo）とDocker Composeを用意し、リポジトリのルートから次を実行します。APIは起動時にPostgreSQLのマイグレーションを適用します。曲検索にはiTunesへのインターネット接続が必要です。
-
-```sh
-cd services/api
-cp .env.example .env
-docker compose up -d --wait db
-cargo run --locked
-```
-
-ローカルのPostgreSQLを使う場合は、上のコピーとComposeの代わりに `node scripts/db-local.mjs` を実行すると、専用DBと接続設定を作成できます（Node.js 22以上）。
-
-ソースから起動した場合の既定のAPI接続先は `http://127.0.0.1:3000/api/` です。USB接続では別のターミナルから端末ごとに `adb -s DEVICE_ID reverse tcp:3000 tcp:3000` を実行します。別のサーバーに接続する場合は、ビルド時に `--dart-define=API_BASE_URL=https://your-host/api/` を指定します。
-
-Googleログインを使う場合は、アプリID `jp.feswave.feswave_android` とAPK署名のSHA-1に対応するAndroid OAuthクライアントを登録し、同じGoogle CloudプロジェクトのWebクライアントIDをAPIの `GOOGLE_CLIENT_ID` に設定します。HTTPSで公開する場合は `COOKIE_SECURE=true` を設定してください。
-
-配布用APKは東京リージョンのCloud Run上のAPIを使用します。[本番構成とデプロイ手順](infra/README.md)
-
-## 開発に参加する
-
-不具合や機能の提案は [Issues](https://github.com/mashumarrow/feswave/issues) へ。Bluetooth関連の報告には、端末機種・Androidバージョン・2台の距離・どちらの端末に何が表示されたかを添えてください。
-
-| 変更箇所 | 検証方法 |
+| 機能 | 主な技術と役割 |
 | --- | --- |
-| [Flutterアプリ](apps/feswave_android) | 同ディレクトリで `mise exec -- flutter analyze` と `mise exec -- flutter test` |
-| [Rust API](services/api) | 開発用DBを起動し、同ディレクトリで `npm ci` と `npm test`（Node.js 22以上） |
+| ライブ画面 | Flutter（Dart）で画面を構成し、Flameで参加者と波紋を描画します。 |
+| 端末間の通信 | AndroidのBluetooth機能を使い、BLE広告で反応を交換します。公開プロフィールはGATTで読み取ります。 |
+| 共感メモリ | Driftを使って相手と曲を端末内のSQLiteに保存し、Riverpodを通じて履歴を画面に反映します。 |
+| 曲検索・プロフィール同期 | Cloud Run上でRustのAPI（Axum・Tokio）が動きます。曲検索にはiTunes Search APIを使い、プロフィールはCloud SQLのPostgreSQLに保存します。 |
 
-DB変更は [migrations](services/api/migrations) に次の未使用番号のSQLファイルとして追加します。
+[![Android端末間の通信、端末内の保存先、本番APIとデプロイの構成](docs/images/stack.png)](docs/images/stack.png)
+
+<a id="曲検索とプロフィール同期"></a>
+
+[端末間通信・音声解析・認証の詳細図](docs/images/runtime.png) · [開発ガイド](docs/development.md) · [本番環境の構成](infra/README.md) · [公開APIの稼働確認](https://feswave-api-933816421570.asia-northeast1.run.app/api/health)
 
 ## ライセンス
 
-FESWAVEのソースコードは [MIT License](LICENSE) で公開しています。依存ライブラリにはそれぞれのライセンスが適用されます。Googleのロゴ、曲のジャケット画像などの第三者素材は各権利者に帰属します。 第三者の著作権表示と利用条件は [Third-party licenses](THIRD_PARTY_LICENSES.md) を参照してください。
+ソースコードは[MITライセンス](LICENSE)で公開しています。依存ライブラリや第三者素材の利用条件は[ライセンス一覧](THIRD_PARTY_LICENSES.md)を参照してください。
