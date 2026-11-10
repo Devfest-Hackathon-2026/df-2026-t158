@@ -1,0 +1,45 @@
+name: Build demo APK
+
+on:
+  push:
+    branches-ignore: [main]
+    paths:
+      - 'apps/feswave_android/**'
+      - '!apps/feswave_android/**/*.md'
+      - '!apps/feswave_android/test/**'
+      - '!apps/feswave_android/verification/**'
+      - '!apps/feswave_android/tool/**'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: demo-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/feswave_android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.9'
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter build apk --debug --no-pub --target-platform android-arm64 --dart-define=API_BASE_URL=https://feswave-api-933816421570.asia-northeast1.run.app/api/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: feswave-demo-arm64
+          path: apps/feswave_android/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error

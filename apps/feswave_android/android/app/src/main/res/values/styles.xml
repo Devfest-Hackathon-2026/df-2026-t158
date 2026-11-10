@@ -1,0 +1,9 @@
+<resources>
+    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">@color/stage_background</item>
+    </style>
+    <style name="LaunchTheme" parent="NormalTheme">
+        <item name="android:windowSplashScreenBackground">@color/stage_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/wave</item>
+    </style>
+</resources>
